@@ -9,8 +9,14 @@ import time
 import socket
 import segnali
 
+CURRDIR = os.path.dirname(os.path.abspath(__file__))
+FCONF = os.path.join(CURRDIR, 'ortuBK.conf')
+# NOME_FPAR = os.path.join(CURRDIR, 'comunica.conf')
 
-
+STRUTTURA_CONFIGURAZIONE={
+            'bks': {},
+            'altro': {'mailFROM': '', 'mailTO': ''}
+}
 from bkFile import *
 
 
@@ -18,19 +24,18 @@ from bkFile import *
 
 class MotoreBackup(bkFile):
     def __init__(self):
-        super().__init__()
-        # print(self._path_fpar)
-        # l = sys.argv[0].split("/")
-        # self.__nomePS = l[len(l) - 1].split(".")[0]
-        # self.__fpar = open(self._path_fpar, "rb")
-        # self.__leggiVariabiliComunicazione(self.__fpar)
+        self.__controlloFileConfigurazione()
+        super().__init__(FCONF)
 
-        # self.sema = threading.Lock()
-        # self.sema.release()
         self._bks, self._altro = self._get_impostazioni()
         # print(self._bks)
         self.__impoIni = self.__thFine = 0
         threading.Thread(target=self.__th_ascolta, args=()).start()
+    def __controlloFileConfigurazione(self):
+        if not os.path.isfile(FCONF):
+            with open(FCONF, "w") as f:
+                #print(str(STRUTTURA_CONFIGURAZIONE))
+                f.write(str(STRUTTURA_CONFIGURAZIONE))
     def __th_ascolta(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((segnali.HOST, segnali.PORT))
@@ -48,22 +53,13 @@ class MotoreBackup(bkFile):
                         self.__impoIni=1
                         conn.sendall(segnali.OK)
                     # print(data)
-
     def __settaVariabiliComunicazione(self, path_fpar, fine, impo):
         fpar = open(path_fpar, "wb")
         fpar.write((fine + impo).encode("utf-8"))
         fpar.close()
 
-    # def __leggiVariabiliComunicazione(self, fpar):
-    #    fpar.seek(0, 0)
-    #    tmp = fpar.read(2)
-    #    self.__thFine = tmp[0] - 48
-    #    self.__impoIni = tmp[1] - 48
-        # print(tmp,self.__thFine,self.__impoIni)
-
     def __set_restart_impostazioni(self):
         self.__impoIni = 1
-
     def __startBK(self, dnow, cron):
         if cron['minuto'] != "*":
             if int(dnow.strftime("%M")) != int(cron['minuto']):
@@ -82,7 +78,6 @@ class MotoreBackup(bkFile):
                 return False
 
         return True
-
     def esegui(self):
         # st = True
         stesso_minuto = {}

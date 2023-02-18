@@ -8,12 +8,7 @@ import ast
 import subprocess
 from datetime import datetime
 
-CURRDIR = os.path.dirname(os.path.abspath(__file__))
-NOME_FCONF = os.path.join(CURRDIR, 'danieleRBK.conf')
-NOME_FPAR = os.path.join(CURRDIR, 'comunica.conf')
-
 DEBUG = False
-
 
 class bkFile():
     # def __init__(self, ch, bks, cd):
@@ -21,9 +16,9 @@ class bkFile():
         if DEBUG:
             print(s)
 
-    def __init__(self):
-        self._path_fconf = NOME_FCONF
-        self._path_fpar = NOME_FPAR
+    def __init__(self,path_fconf):
+        self.__path_fconf = path_fconf
+        #self._path_fpar = NOME_FPAR
         self._bks, self._altro = self._get_impostazioni()
 
     def _is_running(self, ps):
@@ -114,7 +109,7 @@ class bkFile():
         return True
 
     def _get_impostazioni(self):
-        with open(self._path_fconf, "r") as data:
+        with open(self.__path_fconf, "r") as data:
             d = ast.literal_eval(data.read())
             data.close()
         # d=MainW.get_impostazioni(self.fconf)
