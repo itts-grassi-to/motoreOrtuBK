@@ -16,10 +16,11 @@ class bkFile():
         if DEBUG:
             print(s)
 
-    def __init__(self,path_fconf):
-        self.__path_fconf = path_fconf
+    def __init__(self,bks, altro):
+        self._bks, self._altro = bks, altro
+        # self.__path_fconf = path_fconf
         #self._path_fpar = NOME_FPAR
-        self._bks, self._altro = self._get_impostazioni()
+        #self._bks, self._altro = self._get_impostazioni()
 
     def _is_running(self, ps):
         r = subprocess.run(["ps", "-e"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -49,7 +50,7 @@ class bkFile():
             self._printa(data)
         self._remotoDA = data['dirDA']["remoto"]
         self._remotoTO = data['dirTO']["remoto"]
-        self._dirBASE = CURRDIR
+        self._dirBASE = "."
         if self._remotoDA:
             self._dirDA = data['dirDA']['utente'] +'@' + \
                 data['dirDA']["host"] + ":" + \
@@ -67,7 +68,8 @@ class bkFile():
         self._mntDA = data['dirDA']["mnt"]
         self._mntTO = data['dirTO']["mnt"]
         self._nome = ch
-        self._path_flog = CURRDIR + "/" + self._nome + ".log"
+        #self._path_flog = CURRDIR + "/" + self._nome + ".log"
+        self._path_flog = "./" + self._nome + ".log"
         self._flog = open(self._path_flog, "w")
         self._do = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
         self._latestDIR = self._dirBK + "/" + "latestDIR"
@@ -108,12 +110,6 @@ class bkFile():
         self._flog.write("\nFine inizializzazione processo")
         return True
 
-    def _get_impostazioni(self):
-        with open(self.__path_fconf, "r") as data:
-            d = ast.literal_eval(data.read())
-            data.close()
-        # d=MainW.get_impostazioni(self.fconf)
-        return d['bks'], d['altro']
 
     def __isMount(self, sub):
         r = subprocess.run(["df"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)

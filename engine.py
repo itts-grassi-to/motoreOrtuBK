@@ -22,15 +22,22 @@ from bkFile import *
 
 
 
-class MotoreBackup(bkFile):
+class MotoreBackup():
     def __init__(self):
         self.__controlloFileConfigurazione()
-        super().__init__(FCONF)
+        self._bks, self._altro = self.__get_impostazioni()
+        # super().__init__(FCONF)
 
-        self._bks, self._altro = self._get_impostazioni()
         # print(self._bks)
         self.__impoIni = self.__thFine = 0
         threading.Thread(target=self.__th_ascolta, args=()).start()
+    def __get_impostazioni(self):
+        with open(FCONF, "r") as data:
+            d = ast.literal_eval(data.read())
+            data.close()
+        # d=MainW.get_impostazioni(self.fconf)
+        return d['bks'], d['altro']
+
     def __controlloFileConfigurazione(self):
         if not os.path.isfile(FCONF):
             with open(FCONF, "w") as f:
@@ -93,7 +100,7 @@ class MotoreBackup(bkFile):
                 self.__impoIni = 0
                 print("restart**********************")
                 #self.__settaVariabiliComunicazione(NOME_FPAR, str(self.__thFine), "0")
-                self._bks, self._altro = self._get_impostazioni()
+                self._bks, self._altro = self.__get_impostazioni()
 
             for ch in self._bks:
                 if ch not in stesso_minuto:
@@ -115,7 +122,7 @@ class MotoreBackup(bkFile):
                             stesso_minuto[ch] = str(x)[0:16]
                             # self._bks[ch]['attivo']=False
                             # print("thread_function: backuppo : " + ch)
-                            bf = bkFile()
+                            bf = bkFile(self._bks, self._altro)
                             threading.Thread(target=bf._esegui, args=(ch,)).start()
                 # print("CH: "+ch, self._bks[ch]['attivo'])
             # print("************************leggo variabili")
