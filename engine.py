@@ -88,18 +88,12 @@ class MotoreBackup():
     def esegui(self):
         # st = True
         stesso_minuto = {}
-        # print(self.__nomePS)
-        # if self._is_running(self.__nomePS):
-        #    print("motore_backup - esegui: Processo attivo")
-        #    return
-        #self.__settaVariabiliComunicazione(self._path_fpar, "0", "0")
         print("AVVIO il motore.. brum brum")
         while self.__thFine == 0:
             # print("ATTIVO")
             if self.__impoIni == 1:
                 self.__impoIni = 0
                 print("restart**********************")
-                #self.__settaVariabiliComunicazione(NOME_FPAR, str(self.__thFine), "0")
                 self._bks, self._altro = self.__get_impostazioni()
 
             for ch in self._bks:
@@ -122,7 +116,7 @@ class MotoreBackup():
                             stesso_minuto[ch] = str(x)[0:16]
                             # self._bks[ch]['attivo']=False
                             # print("thread_function: backuppo : " + ch)
-                            bf = bkFile(self._bks, self._altro)
+                            bf = bkFile(self._bks, self._altro, CURRDIR)
                             threading.Thread(target=bf._esegui, args=(ch,)).start()
                 # print("CH: "+ch, self._bks[ch]['attivo'])
             # print("************************leggo variabili")
