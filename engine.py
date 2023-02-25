@@ -108,7 +108,6 @@ class MotoreBackup():
                     # print(ch, "-----", self._bks[ch]['attivo'], "--------------", stesso_minuto[ch] == str(x)[14:16])
                     if self.__startBK(x, self._bks[ch]['cron']):
                         # print(str(x)[14:16])
-                        #print(str(x)[14:16])
                         #print(str(x))
                         # print("thread_function: seleziono backup")
                         # print("thread_function: stesso_minuto["+ch+"]= "+ stesso_minuto[ch])

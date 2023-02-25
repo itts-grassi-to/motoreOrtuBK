@@ -72,11 +72,12 @@ class bkFile():
     def __isMount(self, sub):
         r = subprocess.run(["df"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return sub in str(r.stdout)
-    def __send_log(self, mail):
-        if mail and not DEBUG:
-            dummy = 0
-            os.system("mail -s  '" + self.__nome + "' server.backup@itisgrassi.edu.it < " + self.__path_flog)
-        self._printa("MAIL INVIATA: mail -s  '" + self.__nome + "' server.backup@itisgrassi.edu.it < " + self.__path_flog)
+    def __send_log(self, invia):
+        # print("****** send_log")
+        if invia and not DEBUG:
+            vmail = "mail -s  'backup incrementale su r740' server.backup@itisgrassi.edu.it < " + self.__path_flog
+            os.system(vmail)
+            print("MAIL INVIATA: " + vmail)
     def __inizializza_paths(self):
         with open(self.__path_flog, "a") as flog:
             if self.__remotoDA:
@@ -131,18 +132,21 @@ class bkFile():
         with open(self.__path_flog, "a") as flog:
             flog.write("\nRimuovuo: " + latestDIR)
             r = os.system("rm -rf " + latestDIR)
-            flog.write("\nNuova base: " + dirBK)
-            flog.write(
-                "\nCreo link: ln -s " + self.__do + "-" + self.__nome + " " + self.__latestDIR_nome)
-            r = os.system("ln -s " + self.__do + "-" + self.__nome + " " + self.__latestDIR_nome)
-            flog.write("\n" + str(r) + "\nPROCESSO ESEGUITO CON SUCESSO\n\n")
-        self.__send_log( True)
+            #flog.write("\nNuova base: " + dirBK)
+            ln = "ln -s " + self.__do + "-" + self.__nome + " " + latestDIR
+            flog.write("\nCreo link: " + ln)
+            r = os.system(ln)
+            if r == 0:
+                flog.write("\nPROCESSO ESEGUITO CON ERRORI\n\n")
+            else:
+                flog.write("\nPROCESSO ESEGUITO CON SUCESSO\n\n")
         print("Finito backup")
     def _esegui(self, ch):
         self.__inizializza_backup(ch)
         print("********************** Inizia thread: "+ch)
         if self.__inizializza_paths():
             self.__backuppa()
+        self.__send_log(True)
         print("********************** fine thread")
 
 
