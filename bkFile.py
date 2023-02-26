@@ -70,7 +70,7 @@ class bkFile():
         with open(self.__path_flog, "w") as flog:
             flog.write("*************** Variabili inizializzate *************\n")
     def __isMount(self, sub):
-        r = subprocess.run(["df"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        r = subprocess.run(["df","-a"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return sub in str(r.stdout)
     def __send_log(self, invia):
         # print("****** send_log")
@@ -84,7 +84,7 @@ class bkFile():
                 flog.write("\nMonto directory da backuppare:\n\t " +
                            self.__protocolloDA + " " + self.__dirDA + " " + self.__mntDA)
                 #mntDA = self._dirBASE + "/" + self._mntDA
-                if not self.__isMount(self.__dirDA):
+                if not self.__isMount(self.__mntDA):
                     r = subprocess.run([self.__protocolloDA, self.__dirDA, self.__mntDA],
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
@@ -100,7 +100,7 @@ class bkFile():
                 flog.write("\nMonto directory dei backup\n\t" +
                            self.__protocolloTO + " " + self.__dirBK + " " + self.__mntTO)
                 # mntTO = self._dirBASE + "/" + self.__mntTO
-                if not self.__isMount(self.__dirBK):
+                if not self.__isMount(self.__mntTO):
                     r = subprocess.run([self.__protocolloTO, self.__dirBK, self.__mntTO],
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
@@ -123,11 +123,12 @@ class bkFile():
             latestDIR = self.__mntTO+"/"+self.__latestDIR_nome
             flog.write("\nUso come base: " + latestDIR)
             attr = '-auv --link-dest "' + latestDIR + '" --exclude=".cache" '
-            dirBK = self.__dirBK + "/" + self.__do + "-" + self.__nome
-            mntTO = self.__mntTO + "/"+ self.__do + "-" + self.__nome
-            rsync = "rsync " + attr + "\n\t" + self.__dirDA + "/\n\t" + mntTO + "\n\t >> " + self.__path_flog
+            # dirBK = self.__dirBK + "/" + self.__do + "-" + self.__nome
+            da=self.__mntDA
+            bk= self.__mntTO + "/" + self.__do + "-" + self.__nome
+            rsync = "rsync " + attr + " " + da + " " + bk + "  >> " + self.__path_flog
             flog.write("\n" + rsync+"\n")
-        r = os.system("rsync " + attr + self.__mntDA + "/ " + mntTO + " >> " + self.__path_flog)
+        r = os.system(rsync)
 
         with open(self.__path_flog, "a") as flog:
             flog.write("\nRimuovuo: " + latestDIR)
@@ -135,11 +136,34 @@ class bkFile():
             #flog.write("\nNuova base: " + dirBK)
             ln = "ln -s " + self.__do + "-" + self.__nome + " " + latestDIR
             flog.write("\nCreo link: " + ln)
-            r = os.system(ln)
-            if r == 0:
+            ros = os.system(ln)
+            flog.write("\n"+str(ros))
+            if ros != 0:
+                flog.write("\nLink nuova base errore\n\n")
+            if self.__isMount(self.__mntDA):
+                r = subprocess.run(["umount", self.__mntDA],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if r.stderr:
+                    flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
+                    self.__send_log(True)
+                    self.initOK = False
+                    ros = 1
+                flog.write("\nDirectory "+self.__mntDA+" smontata")
+            if self.__isMount(self.__mntTO):
+                r = subprocess.run(["umount", self.__mntTO],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if r.stderr:
+                    flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
+                    self.__send_log(True)
+                    self.initOK = False
+                    ros = 1
+                flog.write("\nDirectory "+self.__mntTO+" smontata")
+
+            if ros != 0:
                 flog.write("\nPROCESSO ESEGUITO CON ERRORI\n\n")
             else:
-                flog.write("\nPROCESSO ESEGUITO CON SUCESSO\n\n")
+                flog.write("\nPROCESSO ESEGUITO CON SUCCESSO\n\n")
+
         print("Finito backup")
     def _esegui(self, ch):
         self.__inizializza_backup(ch)
