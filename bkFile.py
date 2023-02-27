@@ -122,11 +122,12 @@ class bkFile():
             flog.write("\n*********Inizio il processo di backup************")
             latestDIR = self.__mntTO+"/"+self.__latestDIR_nome
             flog.write("\nUso come base: " + latestDIR)
-            attr = '-auv --link-dest "' + latestDIR + '" --exclude=".cache" '
+            # attr = '-auv --link-dest "' + latestDIR + '" --exclude=".cache" '
+            attr = '-rltuv --link-dest "' + latestDIR + '" --exclude=".cache" '
             # dirBK = self.__dirBK + "/" + self.__do + "-" + self.__nome
             da=self.__mntDA
             bk= self.__mntTO + "/" + self.__do + "-" + self.__nome
-            rsync = "rsync " + attr + " " + da + " " + bk + "  >> " + self.__path_flog
+            rsync = "rsync " + attr + " " + da + "/ " + bk + "  >> " + self.__path_flog
             flog.write("\n" + rsync+"\n")
         r = os.system(rsync)
 
