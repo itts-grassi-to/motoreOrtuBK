@@ -79,6 +79,8 @@ class bkFile():
             os.system(vmail)
             print("MAIL INVIATA: " + vmail)
     def __inizializza_paths(self):
+        os.system("mkdir -p " + self.__mntDA)
+        os.system("mkdir -p " + self.__mntTO)
         with open(self.__path_flog, "a") as flog:
             if self.__remotoDA:
                 flog.write("\nMonto directory da backuppare:\n\t " +
