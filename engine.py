@@ -25,7 +25,9 @@ from bkFile import *
 class MotoreBackup():
     def __init__(self):
         self.__controlloFileConfigurazione()
-        self._bks, self._altro = self.__get_impostazioni()
+        self.__configurazione = self.__get_impostazioni()
+        self._bks = self.__configurazione['bks']
+        self._altro = self.__configurazione['altro']
         # super().__init__(FCONF)
 
         # print(self._bks)
@@ -34,9 +36,9 @@ class MotoreBackup():
     def __get_impostazioni(self):
         with open(FCONF, "r") as data:
             d = ast.literal_eval(data.read())
-            data.close()
+            #data.close()
         # d=MainW.get_impostazioni(self.fconf)
-        return d['bks'], d['altro']
+        return d
 
     def __controlloFileConfigurazione(self):
         if not os.path.isfile(FCONF):
@@ -59,7 +61,27 @@ class MotoreBackup():
                     elif data == segnali.RESTART:
                         self.__impoIni=1
                         conn.sendall(segnali.OK)
-                    # print(data)
+                    elif data == segnali.GET_CONF:
+                        conn.sendall(bytes(str(self.__configurazione), 'utf-8'))
+                        conn.shutdown(socket.SHUT_WR)
+                    elif data == segnali.SEND_CONF:
+                        conn.sendall(segnali.OK)
+                        rec = b""
+                        while True:
+                            data = conn.recv(segnali.DIM_BUFFER)
+                            if not data:
+                                break
+                            rec += data
+                        #print(len(rec), rec)
+                        self.__salva_configurazione(rec)
+                        self.__set_restart_impostazioni()
+                    else:
+                        print("Richiesta non gestita")
+
+    def __salva_configurazione(self, conf):
+        with open(FCONF, "w") as data:
+            data.write(str(bytes.decode(conf)))
+
     def __settaVariabiliComunicazione(self, path_fpar, fine, impo):
         fpar = open(path_fpar, "wb")
         fpar.write((fine + impo).encode("utf-8"))
@@ -94,8 +116,9 @@ class MotoreBackup():
             if self.__impoIni == 1:
                 self.__impoIni = 0
                 print("restart**********************")
-                self._bks, self._altro = self.__get_impostazioni()
-
+                self.__configurazione = self.__get_impostazioni()
+                self._bks = self.__configurazione['bks']
+                self._altro = self.__configurazione['altro']
             for ch in self._bks:
                 if ch not in stesso_minuto:
                     stesso_minuto[ch] = ""
