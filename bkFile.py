@@ -75,7 +75,7 @@ class bkFile():
     def __send_log(self, invia):
         # print("****** send_log")
         if invia and not DEBUG:
-            vmail = "mail -s  'backup incrementale su r740' server.backup@itisgrassi.edu.it < " + self.__path_flog
+            vmail = "mail -s  'backup incrementale su r740 - "+self.__nome+"' server.backup@itisgrassi.edu.it < " + self.__path_flog
             os.system(vmail)
             print("MAIL INVIATA: " + vmail)
     def __inizializza_paths(self):
