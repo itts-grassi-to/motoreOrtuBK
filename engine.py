@@ -50,6 +50,7 @@ class MotoreBackup():
             s.bind((segnali.HOST, segnali.PORT))
             s.listen()
             while True:
+                print("OBJ: ",s)
                 print("Attendo connessione")
                 conn, addr = s.accept()
                 with conn:
