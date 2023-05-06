@@ -59,6 +59,10 @@ class MotoreBackup():
                     if data == segnali.IS_ATTIVO:
                         if self.__thFine == 0:
                             conn.sendall(segnali.OK)
+                    elif data == segnali.STOP_PS:
+                        self.__thFine = 1
+                        print("Non ricevo più ... ciao")
+                        break
                     elif data == segnali.RESTART:
                         self.__impoIni=1
                         conn.sendall(segnali.OK)
