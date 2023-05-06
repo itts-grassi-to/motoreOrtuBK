@@ -1,7 +1,7 @@
 ## CREATO DA ORTU prof. DANIELE
 ## daniele.ortu@itisgrassi.edu.it
 import sys
-# import ast
+import ast
 import os
 import threading
 import datetime

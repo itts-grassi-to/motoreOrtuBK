@@ -4,9 +4,10 @@
 
 # from danieleRSINK import tbk
 import os
-import ast
+# import ast
 import subprocess
 from datetime import datetime
+import shutil
 
 DEBUG = False
 
@@ -21,6 +22,47 @@ class bkFile():
         self._bks, self._altro = bks, altro
         self.__currDIR = cdir
 
+    def __get_spazio(self, ltdir, da, a):
+        rsync = ["rsync","-navh","--link-dest",ltdir, da, a]
+        r = subprocess.run(rsync, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if r.stderr:
+            return True, r.stderr
+
+        s = str(r.stdout)
+        i = s.find("total size is ")
+        if i == -1:
+            return True, "Non trovo total size"
+        s = s[i + len("total size is "):]
+        print(s)
+        tot = ""
+        for c in s:
+            if c == " ":
+                break;
+            elif c == ',':
+                tot += "."
+            else:
+                tot += c
+        m = 1
+        if tot[-1] == 'K':
+            m = 2 ** 10
+        elif tot[-1] == 'M':
+            m = 2 ** 20
+        elif tot[-1] == 'G':
+            m = 2 ** 30
+        elif tot[-1] == 'T':
+            m = 2 ** 40
+
+        tot = int(float(tot[:-1])) * m
+
+        total, used, free = shutil.disk_usage("/")
+        '''
+        print("Total: %d GiB" % (total//2**30))
+        print("Used: %d GiB" % (used//2**30))
+        print("Free: %d GiB" % (free))	
+        '''
+        if (tot - used) > 0:
+            return False, "spazio disco insufficiente"
+        return False, f'Verrano backuppati {tot//2**20}MB'
     def __getLatest(self, rootdir, nome):
         #s = "gigi"
         #rootdir = '/home/daniele/Scrivania/repository-git/test'
@@ -213,11 +255,21 @@ class bkFile():
             latestDIR = self.__getLatest(self.__mntTO,self.__nome)
             flog.write("\nUso come base: " + latestDIR)
             # attr = '-auv --link-dest "' + latestDIR + '" --exclude=".cache" '
-            attr = '-rltuv --link-dest "' + latestDIR + '" --exclude=".cache" '
+            attr = '-rltu --link-dest "' + latestDIR + '" --exclude=".cache" '
             # dirBK = self.__dirBK + "/" + self.__do + "-" + self.__nome
             da = self.__mntDA
             bk = self.__mntTO + "/" + self.__do + "-" + self.__nome
-            rsync = "rsync " + attr + " " + da + "/ " + bk + "  >> " + self.__path_flog
+
+            err, msg = self.__get_spazio(latestDIR, da, bk)
+            if err:
+                flog.write("\nERRORE: " + msg)
+                self.__send_log(True)
+                self.initOK = False
+                return False
+
+            flog.write("\n" + msg)
+            # rsync = "rsync " + attr + " " + da + "/ " + bk + "  >> " + self.__path_flog
+            rsync = "rsync " + attr + " " + da + "/ " + bk
             flog.write("\n" + rsync + "\n")
         r = os.system(rsync)
 
