@@ -60,8 +60,8 @@ class bkFile():
         print("Used: %d GiB" % (used//2**30))
         print("Free: %d GiB" % (free))	
         '''
-        if (tot - used) > 0:
-            return False, "spazio disco insufficiente"
+        if (tot - free) > 0:
+            return True, "spazio disco insufficiente"
         return False, f'Verrano backuppati {tot//2**20}MB'
     def __getLatest(self, rootdir, nome):
         #s = "gigi"
