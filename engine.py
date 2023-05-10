@@ -50,11 +50,11 @@ class MotoreBackup():
             s.bind((segnali.HOST, segnali.PORT))
             s.listen()
             while True:
-                print("OBJ: ",s)
+                # print("OBJ: ",s)
                 print("Attendo connessione")
                 conn, addr = s.accept()
                 with conn:
-                    print(f"Connected by {addr}")
+                    # print(f"Connected by {addr}")
                     data = conn.recv(1024)
                     if data == segnali.IS_ATTIVO:
                         if self.__thFine == 0:
