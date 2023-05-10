@@ -22,7 +22,7 @@ class bkFile():
         self._bks, self._altro = bks, altro
         self.__currDIR = cdir
 
-    def __get_spazio(self, ltdir, da, a):
+    def __get_spazio(self, ltdir, da, a,mnta):
         rsync = ["rsync","-navh","--link-dest",ltdir, da, a]
         r = subprocess.run(rsync, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if r.stderr:
@@ -54,13 +54,13 @@ class bkFile():
 
         tot = int(float(tot[:-1])) * m
 
-        total, used, free = shutil.disk_usage("/")
+        total, used, free = shutil.disk_usage(mnta)
         '''
         print("Total: %d GiB" % (total//2**30))
         print("Used: %d GiB" % (used//2**30))
         print("Free: %d GiB" % (free))	
         '''
-        spazio = tot - free
+        # spazio = tot - free
         if tot  > free:
             return True, "spazio disco insufficiente\n"+ \
                     "backup:  "+ str(tot)+"\n" + \
@@ -263,7 +263,7 @@ class bkFile():
             da = self.__mntDA
             bk = self.__mntTO + "/" + self.__do + "-" + self.__nome
 
-            err, msg = self.__get_spazio(latestDIR, da, bk)
+            err, msg = self.__get_spazio(latestDIR, da, bk,self.__mntTO)
             if err:
                 flog.write("\nERRORE: " + msg)
                 self.__send_log(True)
