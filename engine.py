@@ -140,6 +140,7 @@ class MotoreBackup():
                         # print("thread_function: seleziono backup")
                         # print("thread_function: stesso_minuto["+ch+"]= "+ stesso_minuto[ch])
                         if stesso_minuto[ch] != str(x)[0:16]:
+                            # print(x)
                             stesso_minuto[ch] = str(x)[0:16]
                             # self._bks[ch]['attivo']=False
                             # print("thread_function: backuppo : " + ch)
