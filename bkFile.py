@@ -205,7 +205,7 @@ class bkFile():
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
                         flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
-                        self.__send_log(True)
+                        # self.__send_log(True)
                         self.initOK = False
                         return False
                     '''
@@ -232,7 +232,7 @@ class bkFile():
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
                         flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
-                        self.__send_log(True)
+                        # self.__send_log(True)
                         self.initOK = False
                         return False
                     '''
@@ -266,7 +266,7 @@ class bkFile():
             err, msg = self.__get_spazio(latestDIR, da, bk,self.__mntTO)
             if err:
                 flog.write("\nERRORE: " + msg)
-                self.__send_log(True)
+                # self.__send_log(True)
                 self.initOK = False
                 return False
 
@@ -292,7 +292,7 @@ class bkFile():
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if r.stderr:
                     flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
-                    self.__send_log(True)
+                    # self.__send_log(True)
                     self.initOK = False
                     ros = 1
                 flog.write("\nDirectory " + self.__mntDA + " smontata")
@@ -301,7 +301,7 @@ class bkFile():
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if r.stderr:
                     flog.write("\nERRORE: " + r.stderr.decode("utf-8"))
-                    self.__send_log(True)
+                    # self.__send_log(True)
                     self.initOK = False
                     ros = 1
                 flog.write("\nDirectory " + self.__mntTO + " smontata")
