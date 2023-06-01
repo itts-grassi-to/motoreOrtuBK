@@ -65,7 +65,7 @@ class bkFile():
             return True, "spazio disco insufficiente\n"+ \
                     "backup:  "+ str(tot)+"\n" + \
                     "libero: " + str(free) + "\n"
-        return False, f'Verrano backuppati {tot//2**20}MB'
+        return False, f'Verrano backuppati: {tot//2**20}MB\n' + f'libero: {free//2**20}MB'
     def __getLatest(self, rootdir, nome):
         #s = "gigi"
         #rootdir = '/home/daniele/Scrivania/repository-git/test'
@@ -318,6 +318,8 @@ class bkFile():
         print("********************** Inizia thread: " + ch)
         if self.__inizializza_paths():
             self.__backuppa()
+        #else:
+        #    print("Errore nell'inizializzazione")
         self.__send_log(True)
         print("********************** fine thread")
 
