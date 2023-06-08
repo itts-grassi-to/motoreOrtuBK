@@ -13,15 +13,15 @@ DEBUG = False
 
 
 class bkFile():
-    # def __init__(self, ch, bks, cd):
-    def _printa(self, s):
-        if DEBUG:
-            print(s)
-
     def __init__(self, bks, altro, cdir):
         self._bks, self._altro = bks, altro
         self.__currDIR = cdir
-
+    def __isnumeric(self,s):
+        try:
+            n = int(s)
+            return n
+        except:
+            return 0
     def __get_spazio(self, ltdir, da, a,mnta):
         rsync = ["rsync","-navh","--link-dest",ltdir, da, a]
         r = subprocess.run(rsync, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -66,17 +66,39 @@ class bkFile():
                     "backup:  "+ str(tot)+"\n" + \
                     "libero: " + str(free) + "\n"
         return False, f'Verrano backuppati: {tot//2**20}MB\n' + f'libero: {free//2**20}MB'
+    def __lista_file(self, rootdir, nome):
+        d = []
+        for file in os.listdir(rootdir):
+            di = os.path.join(rootdir, file)
+            if os.path.isdir(di):
+                if di[len(di)-len(nome):] == nome:
+                    d.append(di)
+        return d
+
+    def __rimuovi(self, root_dir, nome, max_bk):
+        if max_bk == 0:
+            return
+        lst_bk = self.__lista_file(root_dir, nome)
+        print(lst_bk)
+        i = len(lst_bk)-max_bk
+        if i > 0:
+            for i in range(0, i):
+                os.system("rm -rf " + lst_bk[i])
     def __getLatest(self, rootdir, nome):
         #s = "gigi"
         #rootdir = '/home/daniele/Scrivania/repository-git/test'
+        '''
         d = []
         for file in os.listdir(rootdir):
            di = os.path.join(rootdir, file)
            if os.path.isdir(di):
               if di[len(di)-len(nome):] == nome:
                  d.append(di)
+        '''
+        d = self.__lista_file(rootdir, nome)
         if len(d) == 0:
-          return rootdir
+          # return rootdir
+            return ""
         d.sort(reverse=True)
         return d[0]
 
@@ -93,7 +115,6 @@ class bkFile():
                 return True
         return False
         # print(ch)
-
     def __protoSSH(self, d):
         '''
         return d["protocollo"], \
@@ -167,13 +188,12 @@ class bkFile():
         self.__latestDIR_nome = "latestDIR" + ch
         self.__nomeStatoFile = "stf.bin"
         self.__nomeTAR = self.__do + "-" + self.__nome + ".tar.gz"
+        self.__numeroBK = data['numeroBK']
         with open(self.__path_flog, "w") as flog:
             flog.write("*************** Variabili inizializzate *************\n")
-
     def __isMount(self, sub):
         r = subprocess.run(["df", "-a"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return sub in str(r.stdout)
-
     def __send_log(self, invia):
         # print("****** send_log")
         if invia and not DEBUG:
@@ -188,8 +208,6 @@ class bkFile():
             return ""
         except:
             return "Errore nel montaggio"
-
-
     def __inizializza_paths(self):
         with open(self.__path_flog, "a") as flog:
             if self.__remotoDA:
@@ -197,10 +215,6 @@ class bkFile():
                            str(self.__protocolloDA)) # + " " + self.__dirDA + " " + self.__mntDA)
                 # mntDA = self._dirBASE + "/" + self._mntDA
                 if not self.__isMount(self.__mntDA):
-                    '''
-                    r = subprocess.run([self.__protocolloDA, self.__dirDA, self.__mntDA],
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    '''
                     r = subprocess.run(self.__protocolloDA,
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
@@ -208,13 +222,7 @@ class bkFile():
                         # self.__send_log(True)
                         self.initOK = False
                         return False
-                    '''
-                    r=self.__monta(self.__protocolloDA + " " + self.__dirDA + " " + self.__mntDA)
-                    if r=="":
-                        flog.write("\nDirectory montata")
-                    else:
-                        flog.write("\n"+r)
-                    '''
+                    flog.write("\nDirectory montata")
                 else:
                     flog.write("\nDirectory GIA montata")
                 # self._dirDA = mntDA
@@ -223,11 +231,6 @@ class bkFile():
                            str(self.__protocolloTO)) #+ " " + self.__dirBK + " " + self.__mntTO)
                 # mntTO = self._dirBASE + "/" + self.__mntTO
                 if not self.__isMount(self.__mntTO):
-                    '''
-                    r = subprocess.run([self.__protocolloTO, self.__dirBK, self.__mntTO],
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    '''
-
                     r = subprocess.run(self.__protocolloTO,
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if r.stderr:
@@ -235,21 +238,12 @@ class bkFile():
                         # self.__send_log(True)
                         self.initOK = False
                         return False
-                    '''
-                    r=os.system(self.__protocolloTO + " " + self.__dirBK + " " + self.__mntTO)
-                    if r == "":
-                        flog.write("\nDirectory montata")
-                    else:
-                        flog.write("\n" + r)
-                    '''
+                    flog.write("\nDirectory montata")
                 else:
                     flog.write("\nDirectory GIA montata")
-                # self._dirBK = mntTO
 
-                # self._latestDIR = self.currDIR + "/" +self._dirBK+ "/latestDIR" + self._mntTO
             flog.write("\nFine inizializzazione processo")
             return True
-
     def __backuppa(self):
         print("Inizio backup")
         with open(self.__path_flog, "a") as flog:
@@ -275,7 +269,6 @@ class bkFile():
             rsync = "rsync " + attr + " " + da + "/ " + bk
             flog.write("\n" + rsync + "\n")
         r = os.system(rsync)
-
         with open(self.__path_flog, "a") as flog:
             #flog.write("\nRimuovuo: " + latestDIR)
             #r = os.system("rm -rf " + latestDIR)
@@ -309,10 +302,10 @@ class bkFile():
             if ros != 0:
                 flog.write("\nPROCESSO ESEGUITO CON ERRORI\n\n")
             else:
+                self.__rimuovi(self.__mntTO, self.__nome, self.__isnumeric(self.__numeroBK))
                 flog.write("\nPROCESSO ESEGUITO CON SUCCESSO\n\n")
 
         print("Finito backup")
-
     def _esegui(self, ch):
         self.__inizializza_backup(ch)
         print("********************** Inizia thread: " + ch)
