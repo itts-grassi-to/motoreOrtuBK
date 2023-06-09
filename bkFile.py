@@ -23,7 +23,10 @@ class bkFile():
         except:
             return 0
     def __get_spazio(self, ltdir, da, a,mnta):
-        rsync = ["rsync","-navh","--link-dest",ltdir, da, a]
+        if ltdir:
+            rsync = ["rsync","-navh","--link-dest",ltdir, da, a]
+        else:
+            rsync = ["rsync", "-navh", da, a]
         r = subprocess.run(rsync, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if r.stderr:
             return True, r.stderr
@@ -249,7 +252,7 @@ class bkFile():
         with open(self.__path_flog, "a") as flog:
             flog.write("\n*********Inizio il processo di backup************")
             #latestDIR = self.__mntTO + "/" + self.__latestDIR_nome
-            latestDIR = self.__getLatest(self.__mntTO,self.__nome)
+            latestDIR = self.__getLatest(self.__mntTO, self.__nome)
             flog.write("\nUso come base: " + latestDIR)
             # attr = '-auv --link-dest "' + latestDIR + '" --exclude=".cache" '
             attr = '-rltu --link-dest "' + latestDIR + '" --exclude=".cache" '
@@ -259,7 +262,7 @@ class bkFile():
 
             err, msg = self.__get_spazio(latestDIR, da, bk,self.__mntTO)
             if err:
-                flog.write("\nERRORE: " + msg)
+                flog.write("\nERRORE __getspazio: " + str(msg))
                 # self.__send_log(True)
                 self.initOK = False
                 return False
